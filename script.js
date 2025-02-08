@@ -1,3 +1,61 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDuQJVZZ0w65mrl2A-swnrcD8JUz7XrmHc",
+    authDomain: "loc70-eaf4d.firebaseapp.com",
+    projectId: "loc70-eaf4d",
+    storageBucket: "loc70-eaf4d.appspot.com",
+    messagingSenderId: "962983024035",
+    appId: "1:962983024035:web:18689d6ca85b05c8a13616",
+    measurementId: "G-5Y73CMW04G"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Function to fetch and display cases
+async function fetchCases() {
+    const casesGrid = document.querySelector(".cases-grid");
+    if (!casesGrid) {
+        console.error("No element with class 'cases-grid' found.");
+        return;
+    }
+    casesGrid.innerHTML = "";  // Clear existing cases
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "cases"));
+        if (querySnapshot.empty) {
+            console.log("No cases found.");
+            casesGrid.innerHTML = '<p>No cases available.</p>';
+            return;
+        }
+
+        querySnapshot.forEach((doc) => {
+            const caseData = doc.data();
+            console.log("Fetched case:", doc.id, caseData);
+
+            const caseElement = document.createElement("div");
+            caseElement.classList.add("case-card");
+            caseElement.innerHTML = `
+                <h3>${caseData.title}</h3>
+                <p>${caseData.description}</p>
+                <p><strong>Priority:</strong> ${caseData.priority}</p>
+                <p><strong>Status:</strong> ${caseData.status}</p>
+            `;
+            casesGrid.appendChild(caseElement);
+        });
+    } catch (e) {
+        console.error("Error fetching cases: ", e);
+        alert("Error fetching cases: " + e.message);
+    }
+}
+
+// Fetch cases on DOM load
+document.addEventListener("DOMContentLoaded", fetchCases);
+
 // Theme Toggle
 document.getElementById('toggle-theme').addEventListener('click', function() {
     document.body.classList.toggle('dark-mode');
@@ -98,4 +156,4 @@ setInterval(() => {
     if (alerts.children.length > 5) {
         alerts.removeChild(alerts.lastChild);
     }
-}, 30000); 
+}, 30000);

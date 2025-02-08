@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 </head>
 <body>
     <div class="auth-container">
@@ -29,31 +31,31 @@
                 </div>
 
                 <!-- City Level Form -->
-                <form id="cityLevelForm" class="compact-form">
+                <form id="signupForm" class="compact-form">
                     <div class="form-row">
                         <div class="input-group">
                             <i class="fas fa-user"></i>
-                            <input type="text" placeholder="Full Name" required>
+                            <input type="text" id="fullName" placeholder="Full Name" required>
                         </div>
                         <div class="input-group">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" placeholder="Official Email" required>
+                            <input type="email" id="email" placeholder="Official Email" required>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="input-group">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" placeholder="Phone Number" required>
+                            <input type="tel" id="phone" placeholder="Phone Number" required>
                         </div>
                         <div class="input-group">
                             <i class="fas fa-id-badge"></i>
-                            <input type="text" placeholder="Badge Number" required>
+                            <input type="text" id="badgeNumber" placeholder="Badge Number" required>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="input-group">
                             <i class="fas fa-building"></i>
-                            <select required>
+                            <select id="policeStation" required>
                                 <option value="">Select Zone</option>
                                 <option value="zone1">Zone 1</option>
                                 <option value="zone2">Zone 2</option>
@@ -62,7 +64,7 @@
                         </div>
                         <div class="input-group">
                             <i class="fas fa-user-shield"></i>
-                            <select required>
+                            <select id="rank" required>
                                 <option value="">Select Rank</option>
                                 <option value="CP">Commissioner (CP)</option>
                                 <option value="JCP">Joint Commissioner (JCP)</option>
@@ -74,16 +76,16 @@
                     <div class="form-row">
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
-                            <input type="password" placeholder="Password" required>
+                            <input type="password" id="password" placeholder="Password" required>
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
-                            <input type="password" placeholder="Confirm Password" required>
+                            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
                         </div>
                     </div>
                     <div class="input-group">
                         <i class="fas fa-key"></i>
-                        <input type="text" placeholder="City Level Officer Code" required>
+                        <input type="text" id="officerCode" placeholder="City Level Officer Code" required>
                     </div>
                     <button type="submit" class="auth-btn">Register as City Level Officer</button>
                 </form>
@@ -157,4 +159,4 @@
     </div>
     <script type="module" src="signup.js"></script>
 </body>
-</html> 
+</html>

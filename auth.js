@@ -1,3 +1,22 @@
+// Import necessary Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDuQJVZZ0w65mrl2A-swnrcD8JUz7XrmHc",
+    authDomain: "loc70-eaf4d.firebaseapp.com",
+    projectId: "loc70-eaf4d",
+    storageBucket: "loc70-eaf4d.appspot.com",
+    messagingSenderId: "962983024035",
+    appId: "1:962983024035:web:18689d6ca85b05c8a13616",
+    measurementId: "G-5Y73CMW04G"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 // Officer code patterns and validation
 const OFFICER_CODES = {
     city: {
@@ -109,45 +128,22 @@ class AuthManager {
         }
 
         try {
-            // Here you would typically make an API call to your backend
-            const response = await this.performLogin(loginData);
-            
-            if (response.success) {
-                // Store necessary data in localStorage/sessionStorage
-                localStorage.setItem('userRole', codeValidation.role);
-                localStorage.setItem('accessLevel', codeValidation.level);
-                localStorage.setItem('officerCode', loginData.officerCode);
-                
-                // Redirect to dashboard
-                window.location.href = '/dashboard.html';
-            } else {
-                this.showError(response.message || 'Login failed');
-            }
+            // Authenticate with Firebase
+            const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
+            const user = userCredential.user;
+            console.log('User logged in:', user);
+
+            // Store necessary data in localStorage/sessionStorage
+            localStorage.setItem('userRole', codeValidation.role);
+            localStorage.setItem('accessLevel', codeValidation.level);
+            localStorage.setItem('officerCode', loginData.officerCode);
+
+            // Redirect to index.html
+            window.location.href = 'index.html';
         } catch (error) {
-            this.showError('An error occurred during login');
+            this.showError('Invalid email or password');
             console.error('Login error:', error);
         }
-    }
-
-    async performLogin(loginData) {
-        // Mock API call - Replace with actual API endpoint
-        // return await fetch('/api/login', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(loginData)
-        // }).then(res => res.json());
-
-        // For demonstration, returning mock response
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    success: true,
-                    message: 'Login successful'
-                });
-            }, 1000);
-        });
     }
 
     showError(message) {
@@ -159,4 +155,4 @@ class AuthManager {
 // Initialize auth manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new AuthManager();
-}); 
+});

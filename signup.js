@@ -1,260 +1,38 @@
-class SignupManager {
-    constructor() {
-        this.form = document.getElementById('signupForm');
-        this.loginTypeToggle = document.getElementById('loginTypeToggle');
-        this.initializeFormElements();
-        this.initializeEventListeners();
-        this.populateStationsAndRanks();
+// Import necessary Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDuQJVZZ0w65mrl2A-swnrcD8JUz7XrmHc",
+    authDomain: "loc70-eaf4d.firebaseapp.com",
+    projectId: "loc70-eaf4d",
+    storageBucket: "loc70-eaf4d.appspot.com",
+    messagingSenderId: "962983024035",
+    appId: "1:962983024035:web:18689d6ca85b05c8a13616",
+    measurementId: "G-5Y73CMW04G"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById('signupForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log('User signed up:', user);
+        alert('Registration successful!');
+        window.location.href = 'login.html';
+    } catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error('Error signing up:', errorCode, errorMessage);
+        alert('Error signing up: ' + errorMessage);
     }
-
-    initializeFormElements() {
-        this.elements = {
-            fullName: document.getElementById('fullName'),
-            email: document.getElementById('email'),
-            phone: document.getElementById('phone'),
-            badgeNumber: document.getElementById('badgeNumber'),
-            policeStation: document.getElementById('policeStation'),
-            rank: document.getElementById('rank'),
-            joiningDate: document.getElementById('joiningDate'),
-            password: document.getElementById('password'),
-            confirmPassword: document.getElementById('confirmPassword'),
-            officerCode: document.getElementById('officerCode')
-        };
-    }
-
-    initializeEventListeners() {
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        this.loginTypeToggle.addEventListener('change', () => this.updateRankOptions());
-        this.elements.password.addEventListener('input', () => this.checkPasswordStrength());
-        this.elements.officerCode.addEventListener('input', () => this.validateOfficerCode());
-    }
-
-    populateStationsAndRanks() {
-        // Populate police stations (example data)
-        const stations = [
-            'Central Police Station',
-            'North District Station',
-            'South District Station',
-            'East District Station',
-            'West District Station'
-        ];
-
-        const stationSelect = this.elements.policeStation;
-        stations.forEach(station => {
-            const option = document.createElement('option');
-            option.value = station;
-            option.textContent = station;
-            stationSelect.appendChild(option);
-        });
-
-        this.updateRankOptions();
-    }
-
-    updateRankOptions() {
-        const isStationLevel = this.loginTypeToggle.checked;
-        const rankSelect = this.elements.rank;
-        rankSelect.innerHTML = '<option value="">Select Rank</option>';
-
-        const ranks = isStationLevel ? 
-            ['SHO', 'SI', 'ASI'] : 
-            ['CP', 'JCP', 'DCP', 'ACP'];
-
-        ranks.forEach(rank => {
-            const option = document.createElement('option');
-            option.value = rank;
-            option.textContent = rank;
-            rankSelect.appendChild(option);
-        });
-    }
-
-    validateOfficerCode() {
-        const code = this.elements.officerCode.value.toUpperCase();
-        this.elements.officerCode.value = code;
-
-        const isStationLevel = this.loginTypeToggle.checked;
-        const validPrefixes = isStationLevel ? 
-            ['SHO', 'SI', 'ASI'] : 
-            ['CP', 'JCP', 'DCP', 'ACP'];
-
-        const isValid = validPrefixes.some(prefix => 
-            code.startsWith(prefix) && /^[A-Z]+\d+$/.test(code)
-        );
-
-        this.elements.officerCode.style.borderColor = code ? 
-            (isValid ? '#48BB78' : '#E53E3E') : 
-            '#e2e8f0';
-
-        return isValid;
-    }
-
-    checkPasswordStrength() {
-        const password = this.elements.password.value;
-        let strength = 0;
-
-        if (password.length >= 8) strength++;
-        if (/[A-Z]/.test(password)) strength++;
-        if (/[0-9]/.test(password)) strength++;
-        if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-        const strengthBar = document.querySelector('.password-strength-bar');
-        if (!strengthBar) return;
-
-        switch(strength) {
-            case 0:
-            case 1:
-                strengthBar.style.width = '33%';
-                strengthBar.className = 'password-strength-bar strength-weak';
-                break;
-            case 2:
-            case 3:
-                strengthBar.style.width = '66%';
-                strengthBar.className = 'password-strength-bar strength-medium';
-                break;
-            case 4:
-                strengthBar.style.width = '100%';
-                strengthBar.className = 'password-strength-bar strength-strong';
-                break;
-        }
-    }
-
-    validateForm() {
-        let isValid = true;
-        const errors = {};
-
-        // Basic validation
-        if (!this.elements.fullName.value.match(/^[A-Za-z\s]{3,}$/)) {
-            errors.fullName = 'Please enter a valid name (minimum 3 characters)';
-            isValid = false;
-        }
-
-        if (!this.elements.email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-            errors.email = 'Please enter a valid email address';
-            isValid = false;
-        }
-
-        if (!this.elements.phone.value.match(/^\d{10}$/)) {
-            errors.phone = 'Please enter a valid 10-digit phone number';
-            isValid = false;
-        }
-
-        if (this.elements.password.value !== this.elements.confirmPassword.value) {
-            errors.confirmPassword = 'Passwords do not match';
-            isValid = false;
-        }
-
-        if (!this.validateOfficerCode()) {
-            errors.officerCode = 'Invalid officer code format';
-            isValid = false;
-        }
-
-        return { isValid, errors };
-    }
-
-    async handleSubmit(event) {
-        event.preventDefault();
-
-        const validation = this.validateForm();
-        if (!validation.isValid) {
-            this.showErrors(validation.errors);
-            return;
-        }
-
-        const formData = {
-            fullName: this.elements.fullName.value,
-            email: this.elements.email.value,
-            phone: this.elements.phone.value,
-            badgeNumber: this.elements.badgeNumber.value,
-            policeStation: this.elements.policeStation.value,
-            rank: this.elements.rank.value,
-            joiningDate: this.elements.joiningDate.value,
-            password: this.elements.password.value,
-            officerCode: this.elements.officerCode.value,
-            isStationLevel: this.loginTypeToggle.checked
-        };
-
-        try {
-            const response = await this.submitRegistration(formData);
-            if (response.success) {
-                alert('Registration successful! Please wait for verification.');
-                window.location.href = 'login.html';
-            } else {
-                alert(response.message || 'Registration failed. Please try again.');
-            }
-        } catch (error) {
-            console.error('Registration error:', error);
-            alert('An error occurred during registration. Please try again.');
-        }
-    }
-
-    async submitRegistration(formData) {
-        // Mock API call - Replace with actual API endpoint
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    success: true,
-                    message: 'Registration successful'
-                });
-            }, 1000);
-        });
-    }
-
-    showErrors(errors) {
-        // Clear existing errors
-        document.querySelectorAll('.error-message').forEach(el => el.remove());
-
-        // Show new errors
-        Object.entries(errors).forEach(([field, message]) => {
-            const element = this.elements[field];
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.textContent = message;
-            element.parentNode.appendChild(errorDiv);
-            element.classList.add('input-error');
-        });
-    }
-}
-
-// Initialize signup manager when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new SignupManager();
 });
-
-document.addEventListener('DOMContentLoaded', function() {
-    const loginTypeToggle = document.getElementById('loginTypeToggle');
-    const cityLevelForm = document.getElementById('cityLevelForm');
-    const stationLevelForm = document.getElementById('stationLevelForm');
-    const cityLevelLabel = document.querySelector('.city-level');
-    const stationLevelLabel = document.querySelector('.station-level');
-
-    // Toggle between forms
-    loginTypeToggle.addEventListener('change', function() {
-        if (this.checked) {
-            // Station Level
-            cityLevelForm.style.display = 'none';
-            stationLevelForm.style.display = 'flex';
-            cityLevelLabel.classList.remove('active');
-            stationLevelLabel.classList.add('active');
-        } else {
-            // City Level
-            cityLevelForm.style.display = 'flex';
-            stationLevelForm.style.display = 'none';
-            cityLevelLabel.classList.add('active');
-            stationLevelLabel.classList.remove('active');
-        }
-    });
-
-    // Form submission handlers
-    cityLevelForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        // Handle city level registration
-        console.log('City Level Registration');
-        // Add your registration logic here
-    });
-
-    stationLevelForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        // Handle station level registration
-        console.log('Station Level Registration');
-        // Add your registration logic here
-    });
-}); 
