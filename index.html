@@ -12,24 +12,19 @@
     <div class="dashboard">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://via.placeholder.com/50" alt="Logo" class="logo">
                 <h2>Police Dashboard</h2>
             </div>
             <nav>
-                <ul>
-                    <li class="active"><i class="fas fa-home"></i> Dashboard</li>
-                    <li><a href="case-management.html"><i class="fas fa-folder"></i> Case Management</a></li>
-                    <li><i class="fas fa-chart-bar"></i> Reports</li>
-                    <li><i class="fas fa-user"></i> Officers</li>
-                    <li><i class="fas fa-cog"></i> Settings</li>
+                <ul id="main-nav">
+                    <!-- Navigation items will be dynamically inserted here -->
                 </ul>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info">
                     <img src="https://via.placeholder.com/40" alt="User" class="user-avatar">
                     <div>
-                        <p class="user-name">Officer John Doe</p>
-                        <p class="user-role">Senior Detective</p>
+                        <p id="navUserName" class="user-name">Loading...</p>
+                        <p id="navUserRank" class="user-role">Loading...</p>
                     </div>
                 </div>
             </div>
@@ -164,6 +159,69 @@
             </div>
         </main>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
+    <script>
+        // Case Statistics Chart
+        const casesCtx = document.getElementById('casesChart').getContext('2d');
+        new Chart(casesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Violent Crimes', 'Property Crimes', 'Cybercrime', 'Traffic Violations', 'Other'],
+                datasets: [{
+                    data: [15, 30, 20, 25, 10],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Monthly Progress Chart
+        const progressCtx = document.getElementById('progressChart').getContext('2d');
+        new Chart(progressCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Cases Solved',
+                    data: [25, 32, 28, 35, 40, 38],
+                    borderColor: '#4ecdc4',
+                    tension: 0.4,
+                    fill: false
+                }, {
+                    label: 'New Cases',
+                    data: [30, 35, 25, 32, 38, 35],
+                    borderColor: '#ff6b6b',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 </body>
-</html>
+</html> 

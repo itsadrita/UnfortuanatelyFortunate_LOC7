@@ -1,12 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Load case data
-    loadCaseData();
-    
-    // Initialize tabs
-    initializeTabs();
-    
-    // Add event listeners
-    setupEventListeners();
+    try {
+        // Add progress tracker styles
+        addProgressTrackerStyles();
+        
+        // Initialize progress tracker with saved step or default
+        const savedStep = localStorage.getItem('currentStep') || 'io-assigned';
+        updateProgressTracker(savedStep);
+        handleProgressStep(savedStep);
+        
+        // Load case data
+        loadCaseData();
+        
+        // Initialize tabs
+        initializeTabs();
+        
+        // Setup event listeners last
+        setupEventListeners();
+        
+        console.log('Initialization complete');
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
 });
 
 function loadCaseData() {
@@ -530,4 +544,161 @@ document.addEventListener('DOMContentLoaded', () => {
             event.target.style.display = 'none';
         }
     }
-}); 
+});
+
+// Update the progress tracker steps and their order
+const progressSteps = {
+    'io-assigned': {
+        icon: 'fa-user-shield',
+        label: 'IO Assigned',
+        order: 1
+    },
+    'fir-report': {
+        icon: 'fa-file-alt',
+        label: 'FIR Report',
+        order: 2
+    },
+    'investigation': {
+        icon: 'fa-search',
+        label: 'Investigation',
+        order: 3
+    },
+    'final-report': {
+        icon: 'fa-file-contract',
+        label: 'Final Report',
+        order: 4
+    },
+    'closed': {
+        icon: 'fa-check-circle',
+        label: 'Closed',
+        order: 5
+    }
+};
+
+// Function to update progress tracker
+function updateProgressTracker(currentStep) {
+    const progressTracker = document.querySelector('.progress-tracker');
+    progressTracker.innerHTML = '';
+
+    Object.entries(progressSteps)
+        .sort((a, b) => a[1].order - b[1].order)
+        .forEach(([stepId, step]) => {
+            const milestone = document.createElement('div');
+            milestone.className = 'milestone';
+            milestone.dataset.step = stepId; // Add data attribute for step identification
+            
+            // Add appropriate classes based on current progress
+            if (step.order < progressSteps[currentStep].order) {
+                milestone.classList.add('completed');
+            } else if (stepId === currentStep) {
+                milestone.classList.add('active');
+            }
+
+            milestone.innerHTML = `
+                <i class="fas ${step.icon}"></i>
+                <span>${step.label}</span>
+            `;
+
+            // Add click handler to each milestone
+            milestone.addEventListener('click', () => {
+                moveToStep(stepId);
+            });
+            
+            progressTracker.appendChild(milestone);
+        });
+}
+
+// Function to move to a specific step
+function moveToStep(targetStep) {
+    const currentStep = getCurrentStep();
+    
+    // Only allow moving to the next step in sequence
+    if (progressSteps[targetStep].order === progressSteps[currentStep].order + 1) {
+        updateProgressTracker(targetStep);
+        handleProgressStep(targetStep);
+        // Save the current step to localStorage
+        localStorage.setItem('currentStep', targetStep);
+        showNotification(`Moved to ${progressSteps[targetStep].label}`);
+    }
+}
+
+// Function to get current step
+function getCurrentStep() {
+    const activeStep = document.querySelector('.milestone.active');
+    return activeStep ? activeStep.dataset.step : 'io-assigned';
+}
+
+// Add this to your CSS to make milestones look clickable
+function addProgressTrackerStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .milestone {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .milestone:hover {
+            transform: translateY(-2px);
+        }
+        
+        .milestone:not(.completed):not(.active) {
+            opacity: 0.7;
+        }
+        
+        .milestone.completed:hover,
+        .milestone.active:hover {
+            transform: translateY(-2px);
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Function to handle progress step actions
+function handleProgressStep(step) {
+    switch(step) {
+        case 'io-assigned':
+            // Show case details and enable FIR report generation
+            document.querySelector('.fir-details').style.display = 'block';
+            break;
+        
+        case 'fir-report':
+            // Enable investigation tools and show FIR report link
+            document.querySelector('.investigation-tools').style.display = 'block';
+            document.querySelector('.fir-report-btn').innerHTML = `
+                <a href="reportgen.html?type=fir&id=${getCaseId()}" class="generate-btn">
+                    <i class="fas fa-file-export"></i> Generate FIR Report
+                </a>
+            `;
+            break;
+            
+        case 'investigation':
+            // Enable evidence collection and log entries
+            document.querySelector('.evidence').style.display = 'block';
+            document.querySelector('.investigation-log').style.display = 'block';
+            break;
+            
+        case 'final-report':
+            // Enable final report generation
+            document.querySelector('.final-report-section').style.display = 'block';
+            document.querySelector('.final-report-btn').innerHTML = `
+                <a href="reportgen.html?type=final&id=${getCaseId()}" class="generate-btn">
+                    <i class="fas fa-file-export"></i> Generate Final Report
+                </a>
+            `;
+            break;
+            
+        case 'closed':
+            // Disable editing and show case summary
+            disableEditing();
+            showCaseSummary();
+            break;
+    }
+}
+
+// Helper function to get case ID from URL
+function getCaseId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id') || '';
+}
+
+// Update the HTML structure in case-file.html to match the new progress steps: 

@@ -407,4 +407,69 @@
 @keyframes slideIn {
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
+}
+
+/* Tool Grid Styles */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.tools-grid button {
+    padding: 15px;
+    background-color: var(--card-background-dark);
+    border: 1px solid var(--border-color-dark);
+    border-radius: 8px;
+    color: var(--text-color-dark);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.tools-grid button:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.tools-grid button i {
+    font-size: 1.5em;
+}
+
+.generate-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.generate-btn:hover {
+    background-color: var(--accent-color-dark);
+    text-decoration: none;
+    color: white;
+}
+
+.generate-btn i {
+    font-size: 1.1em;
+}
+
+/* Disabled state styles */
+.case-closed .generate-btn,
+.case-closed .add-btn,
+.case-closed input,
+.case-closed textarea,
+.case-closed select {
+    pointer-events: none;
+    opacity: 0.6;
 } 

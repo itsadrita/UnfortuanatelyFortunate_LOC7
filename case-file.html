@@ -31,80 +31,62 @@
 
                 <!-- Progress Tracker -->
                 <div class="progress-tracker">
-                    <div class="milestone completed">
-                        <i class="fas fa-file-alt"></i>
-                        <span>FIR Filed</span>
-                    </div>
-                    <div class="milestone completed">
-                        <i class="fas fa-user-shield"></i>
-                        <span>IO Assigned</span>
-                    </div>
-                    <div class="milestone active">
-                        <i class="fas fa-search"></i>
-                        <span>Investigation</span>
-                    </div>
-                    <div class="milestone">
-                        <i class="fas fa-gavel"></i>
-                        <span>Chargesheet</span>
-                    </div>
-                    <div class="milestone">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Closed</span>
-                    </div>
+                    <!-- Will be populated dynamically by JavaScript -->
+                </div>
+
+                <!-- Add this section after the progress-tracker div -->
+                <div class="action-buttons">
+                    <button class="add-log-btn">
+                        <i class="fas fa-plus"></i> Add Log Entry
+                    </button>
+                    <button class="add-evidence-btn">
+                        <i class="fas fa-plus"></i> Add Evidence
+                    </button>
+                    <button class="download-btn">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
                 </div>
 
                 <!-- Main Content Grid -->
                 <div class="case-content-grid">
-                    <!-- FIR Details -->
-                    <section class="case-section fir-details">
-                        <h2><i class="fas fa-file-alt"></i> FIR Details</h2>
-                        <div class="details-grid">
-                            <!-- FIR details here -->
+                    <!-- FIR Details Section -->
+                    <section class="case-section fir-details" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-file-alt"></i> FIR Details</h2>
+                            <div class="fir-report-btn">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <!-- FIR details content -->
+                    </section>
+
+                    <!-- Investigation Tools Section -->
+                    <section class="case-section investigation-tools" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-tools"></i> Investigation Tools</h2>
+                        </div>
+                        <div class="tools-grid">
+                            <button onclick="showModal('addPartyModal')">
+                                <i class="fas fa-users"></i> Add Involved Party
+                            </button>
+                            <button onclick="showModal('addEvidenceModal')">
+                                <i class="fas fa-folder-open"></i> Add Evidence
+                            </button>
+                            <button onclick="showModal('addLogModal')">
+                                <i class="fas fa-clipboard"></i> Add Log Entry
+                            </button>
                         </div>
                     </section>
 
-                    <!-- Involved Parties -->
-                    <section class="case-section parties">
+                    <!-- Final Report Section -->
+                    <section class="case-section final-report-section" style="display: none;">
                         <div class="section-header">
-                            <h2><i class="fas fa-users"></i> Involved Parties</h2>
-                            <button class="add-btn" onclick="showModal('addPartyModal')">
-                                <i class="fas fa-plus"></i> Add Party
-                            </button>
+                            <h2><i class="fas fa-file-contract"></i> Final Report</h2>
+                            <div class="final-report-btn">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
                         </div>
-                        <div class="tabs">
-                            <button class="tab-btn active" data-tab="victims">Victims</button>
-                            <button class="tab-btn" data-tab="suspects">Suspects</button>
-                            <button class="tab-btn" data-tab="witnesses">Witnesses</button>
-                        </div>
-                        <div class="tab-content active" id="victims">
-                            <!-- Party cards will be added here -->
-                        </div>
-                    </section>
-
-                    <!-- Evidence List -->
-                    <section class="case-section evidence">
-                        <div class="section-header">
-                            <h2><i class="fas fa-folder-open"></i> Evidence</h2>
-                            <button class="add-btn" onclick="showModal('addEvidenceModal')">
-                                <i class="fas fa-plus"></i> Add Evidence
-                            </button>
-                        </div>
-                        <div class="evidence-grid">
-                            <!-- Evidence items will be added here -->
-                        </div>
-                    </section>
-
-                    <!-- Investigation Log -->
-                    <section class="case-section investigation-log">
-                        <div class="section-header">
-                            <h2><i class="fas fa-clipboard"></i> Investigation Log</h2>
-                            <button class="add-btn" onclick="showModal('addLogModal')">
-                                <i class="fas fa-plus"></i> Add Entry
-                            </button>
-                        </div>
-                        <div class="log-entries">
-                            <!-- Log entries will be added here -->
-                        </div>
+                        <!-- Final report content -->
                     </section>
                 </div>
             </div>

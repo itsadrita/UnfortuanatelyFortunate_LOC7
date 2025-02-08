@@ -28,7 +28,8 @@ const OFFICER_CODES = {
     station: {
         SHO: { pattern: /^SHO\d+$/, role: 'Station House Officer' },
         SI: { pattern: /^SI\d+$/, role: 'Sub-Inspector' },
-        ASI: { pattern: /^ASI\d+$/, role: 'Assistant Sub-Inspector' }
+        ASI: { pattern: /^ASI\d+$/, role: 'Assistant Sub-Inspector' },
+        IO: { pattern: /^IO\d+$/, role: 'Investigation Officer' }
     }
 };
 
@@ -60,7 +61,7 @@ class AuthManager {
         if (event.target.checked) {
             this.cityLevelLabel.classList.remove('active');
             this.stationLevelLabel.classList.add('active');
-            this.officerCodeInput.placeholder = 'Station Level Code (SHO/SI/ASI)';
+            this.officerCodeInput.placeholder = 'Station Level Code (SHO/SI/ASI/IO)';
         } else {
             this.cityLevelLabel.classList.add('active');
             this.stationLevelLabel.classList.remove('active');
@@ -130,15 +131,12 @@ class AuthManager {
         try {
             // Authenticate with Firebase
             const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
-            const user = userCredential.user;
-            console.log('User logged in:', user);
-
-            // Store necessary data in localStorage/sessionStorage
+            
+            // Store role in localStorage with exact role name
             localStorage.setItem('userRole', codeValidation.role);
-            localStorage.setItem('accessLevel', codeValidation.level);
-            localStorage.setItem('officerCode', loginData.officerCode);
-
-            // Redirect to index.html
+            console.log('Setting user role:', codeValidation.role); // Debug log
+            
+            // Redirect to dashboard
             window.location.href = 'index.html';
         } catch (error) {
             this.showError('Invalid email or password');

@@ -36,17 +36,18 @@
     background-color: var(--accent-color);
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .create-case-btn:hover {
     background-color: #4338ca;
+    transform: scale(1.05);
 }
 
 .cases-grid {
@@ -87,8 +88,18 @@
 }
 
 .priority-badge.high {
-    background-color: rgba(231, 76, 60, 0.2);
-    color: #e74c3c;
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.priority-badge.medium {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.priority-badge.low {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
 }
 
 .case-card h3 {
@@ -97,15 +108,16 @@
 }
 
 .case-description {
-    color: var(--text-color-light);
-    font-size: 0.9em;
-    margin-bottom: 15px;
+    margin: 15px 0;
+    color: var(--text-color-dark);
+    line-height: 1.5;
 }
 
 .case-details {
     display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
+    flex-direction: column;
+    gap: 8px;
+    margin: 15px 0;
 }
 
 .detail-item {
@@ -122,19 +134,61 @@
     align-items: center;
 }
 
-.view-case-btn {
-    background-color: transparent;
-    border: 1px solid var(--accent-color);
-    color: var(--accent-color);
-    padding: 6px 12px;
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
     border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s;
+    font-size: 0.8em;
+    margin-top: 10px;
 }
 
-.view-case-btn:hover {
+.status-badge.open {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.status-badge.in-progress {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.status-badge.closed {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.view-case-btn, .update-btn {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.view-case-btn {
     background-color: var(--accent-color);
     color: white;
+}
+
+.update-btn {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.loading, .no-cases, .error-message {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-color-light);
 }
 
 @media (max-width: 768px) {
@@ -148,16 +202,18 @@
 }
 
 .modal {
-    display: none;
+    display: flex;
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    animation: fadeIn 0.3s, scaleUp 0.3s;
 }
 
 .modal-content {
@@ -165,9 +221,11 @@
     padding: 30px;
     border-radius: 8px;
     width: 90%;
-    max-width: 700px;
+    max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s, fadeInContent 0.3s;
 }
 
 .form-row {
@@ -241,20 +299,30 @@
     background-color: var(--accent-color);
     border: none;
     color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .submit-btn:hover {
     background-color: #4338ca;
+    transform: scale(1.05);
 }
 
 .cancel-btn {
     background-color: transparent;
     border: 1px solid var(--border-color-dark);
     color: var(--text-color-dark);
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .cancel-btn:hover {
     background-color: var(--border-color-dark);
+    transform: scale(1.05);
 }
 
 .case-meta {
@@ -286,11 +354,6 @@
     height: 100%;
     background-color: var(--accent-color);
     transition: width 0.3s ease;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
 }
 
 .view-case-btn, .update-btn, .escalate-btn {
@@ -339,4 +402,24 @@
 .priority-badge.closed {
     background-color: rgba(149, 165, 166, 0.2);
     color: #95a5a6;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from { transform: translate(-50%, -50%) scale(0.8); }
+    to { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes fadeInContent {
+    from { opacity: 0; }
+    to { opacity: 1; }
 } 

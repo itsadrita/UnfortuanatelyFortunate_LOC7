@@ -10,6 +10,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -25,6 +26,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // Function to add a new case
         window.addNewCase = async function() {
@@ -49,30 +51,43 @@
                 alert("Error adding case: " + e.message);
             }
         };
+
+        // Update the authentication check
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const userRole = sessionStorage.getItem('userRole');
+                if (userRole === 'Station House Officer' || userRole === 'SHO') {
+                    renderNavigation('Station House Officer');
+                    // Update user info in sidebar
+                    document.getElementById('navUserName').textContent = user.displayName || user.email;
+                    document.getElementById('navUserRank').textContent = 'Station House Officer';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
     </script>
 </head>
 <body class="dark-mode">
     <div class="dashboard">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="https://via.placeholder.com/50" alt="Logo" class="logo">
+                <i class="fas fa-shield-alt fa-2x"></i>
                 <h2>Police Dashboard</h2>
             </div>
             <nav>
-                <ul>
-                    <li><i class="fas fa-home"></i> Dashboard</li>
-                    <li class="active"><i class="fas fa-folder"></i> Case Management</li>
-                    <li><i class="fas fa-chart-bar"></i> Reports</li>
-                    <li><i class="fas fa-user"></i> Officers</li>
-                    <li><i class="fas fa-cog"></i> Settings</li>
+                <ul id="main-nav">
+                    <!-- Navigation will be dynamically populated based on SHO role -->
                 </ul>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <img src="https://via.placeholder.com/40" alt="User" class="user-avatar">
+                    <i class="fas fa-user-circle fa-2x"></i>
                     <div>
-                        <p class="user-name">Officer John Doe</p>
-                        <p class="user-role">Senior Detective</p>
+                        <p class="user-name" id="navUserName">Loading...</p>
+                        <p class="user-role" id="navUserRank">Loading...</p>
                     </div>
                 </div>
             </div>
@@ -85,7 +100,10 @@
                     <input type="text" placeholder="Search cases...">
                 </div>
                 <div class="header-actions">
-                    <button class="create-case-btn" onclick="document.getElementById('createCaseModal').style.display='block'"><i class="fas fa-plus"></i> New Case</button>
+                    <button class="create-case-btn" onclick="document.getElementById('createCaseModal').style.display='block'">
+                        <i class="fas fa-plus"></i> 
+                        <span>Create New Case</span>
+                    </button>
                     <button id="toggle-theme"><i class="fas fa-moon"></i></button>
                     <div class="notifications">
                         <i class="fas fa-bell"></i>
@@ -136,27 +154,96 @@
                     <span class="close" onclick="document.getElementById('createCaseModal').style.display='none'">&times;</span>
                     <h2>Create New Case</h2>
                     <form id="newCaseForm" onsubmit="event.preventDefault(); addNewCase();">
-                        <label for="caseTitle">Case Title</label>
-                        <input type="text" id="caseTitle" required>
-                        
-                        <label for="caseDescription">Description</label>
-                        <textarea id="caseDescription" required></textarea>
-                        
-                        <label for="casePriority">Priority</label>
-                        <select id="casePriority" required>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
-                        </select>
-                        
-                        <label for="caseStatus">Status</label>
-                        <select id="caseStatus" required>
-                            <option value="Open">Open</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Closed">Closed</option>
-                        </select>
-                        
-                        <button type="submit">Add Case</button>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="caseId">Case ID</label>
+                                <input type="text" id="caseId" disabled placeholder="Auto-generated">
+                            </div>
+                            <div class="form-group">
+                                <label for="caseTitle">Case Title*</label>
+                                <input type="text" id="caseTitle" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidentDate">Date of Incident*</label>
+                                <input type="datetime-local" id="incidentDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="incidentLocation">Location of Incident*</label>
+                                <input type="text" id="incidentLocation" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="caseType">Type of Case*</label>
+                                <select id="caseType" required>
+                                    <option value="">Select case type</option>
+                                    <option value="Theft">Theft</option>
+                                    <option value="Assault">Assault</option>
+                                    <option value="Fraud">Fraud</option>
+                                    <option value="Burglary">Burglary</option>
+                                    <option value="Vandalism">Vandalism</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="casePriority">Priority Level*</label>
+                                <select id="casePriority" required>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="complainantName">Complainant Name*</label>
+                                <input type="text" id="complainantName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="complainantContact">Complainant Contact*</label>
+                                <input type="tel" id="complainantContact" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="assignedOfficer">Assigned Investigating Officer*</label>
+                                <select id="assignedOfficer" required>
+                                    <option value="">Select officer</option>
+                                    <!-- Officers will be populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="officerContact">IO Contact Details</label>
+                                <input type="text" id="officerContact" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="caseDescription">Brief Case Description*</label>
+                            <textarea id="caseDescription" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="additionalNotes">Additional Notes</label>
+                            <textarea id="additionalNotes"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="attachments">Attachments</label>
+                            <input type="file" id="attachments" multiple>
+                            <span class="file-hint">Supported formats: PDF, JPG, PNG (Max size: 5MB)</span>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="cancel-btn" onclick="document.getElementById('createCaseModal').style.display='none'">Cancel</button>
+                            <button type="submit" class="submit-btn">Create Case</button>
+                        </div>
                     </form>
                 </div>
             </div>
