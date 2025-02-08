@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case File #2024-001 - IO View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="case-file.css">
+</head>
+<body class="dark-mode">
+    <div class="dashboard">
+        <!-- Sidebar remains same -->
+        <main class="main-content">
+            <div class="case-file-container">
+                <!-- Case Header -->
+                <div class="case-header">
+                    <div class="case-title">
+                        <h1>Case #2024-001: Armed Robbery Investigation</h1>
+                        <div class="case-badges">
+                            <span class="status-badge active">Active</span>
+                            <span class="priority-badge high">High Priority</span>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="action-btn" onclick="generateReport()">
+                            <i class="fas fa-download"></i> Download Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Tracker -->
+                <div class="progress-tracker">
+                    <div class="milestone completed">
+                        <i class="fas fa-file-alt"></i>
+                        <span>FIR Filed</span>
+                    </div>
+                    <div class="milestone completed">
+                        <i class="fas fa-user-shield"></i>
+                        <span>IO Assigned</span>
+                    </div>
+                    <div class="milestone active">
+                        <i class="fas fa-search"></i>
+                        <span>Investigation</span>
+                    </div>
+                    <div class="milestone">
+                        <i class="fas fa-gavel"></i>
+                        <span>Chargesheet</span>
+                    </div>
+                    <div class="milestone">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Closed</span>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="case-content-grid">
+                    <!-- FIR Details -->
+                    <section class="case-section fir-details">
+                        <h2><i class="fas fa-file-alt"></i> FIR Details</h2>
+                        <div class="details-grid">
+                            <!-- FIR details here -->
+                        </div>
+                    </section>
+
+                    <!-- Involved Parties -->
+                    <section class="case-section parties">
+                        <div class="section-header">
+                            <h2><i class="fas fa-users"></i> Involved Parties</h2>
+                            <button class="add-btn" onclick="showModal('addPartyModal')">
+                                <i class="fas fa-plus"></i> Add Party
+                            </button>
+                        </div>
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="victims">Victims</button>
+                            <button class="tab-btn" data-tab="suspects">Suspects</button>
+                            <button class="tab-btn" data-tab="witnesses">Witnesses</button>
+                        </div>
+                        <div class="tab-content active" id="victims">
+                            <!-- Party cards will be added here -->
+                        </div>
+                    </section>
+
+                    <!-- Evidence List -->
+                    <section class="case-section evidence">
+                        <div class="section-header">
+                            <h2><i class="fas fa-folder-open"></i> Evidence</h2>
+                            <button class="add-btn" onclick="showModal('addEvidenceModal')">
+                                <i class="fas fa-plus"></i> Add Evidence
+                            </button>
+                        </div>
+                        <div class="evidence-grid">
+                            <!-- Evidence items will be added here -->
+                        </div>
+                    </section>
+
+                    <!-- Investigation Log -->
+                    <section class="case-section investigation-log">
+                        <div class="section-header">
+                            <h2><i class="fas fa-clipboard"></i> Investigation Log</h2>
+                            <button class="add-btn" onclick="showModal('addLogModal')">
+                                <i class="fas fa-plus"></i> Add Entry
+                            </button>
+                        </div>
+                        <div class="log-entries">
+                            <!-- Log entries will be added here -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="addPartyModal" class="modal">
+        <div class="modal-content">
+            <!-- Party Form Content -->
+        </div>
+    </div>
+
+    <div id="addEvidenceModal" class="modal">
+        <div class="modal-content">
+            <!-- Evidence Form Content -->
+        </div>
+    </div>
+
+    <div id="addLogModal" class="modal">
+        <div class="modal-content">
+            <!-- Log Entry Form Content -->
+        </div>
+    </div>
+
+    <script src="case-file.js"></script>
+</body>
+</html> 

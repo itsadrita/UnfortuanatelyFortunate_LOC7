@@ -2,35 +2,79 @@
 document.body.insertAdjacentHTML('beforeend', `
     <div id="createCaseModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h2>Create New Case</h2>
-            <form id="createCaseForm">
+            <h2>Case Assignment</h2>
+            <form id="caseAssignmentForm">
                 <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="caseTitle" required>
+                    <label for="fir_number">FIR Number:</label>
+                    <input type="text" id="fir_number" name="fir_number" required>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="crime_type">Crime Type:</label>
+                        <select id="crime_type" name="crime_type" required>
+                            <option value="">Select Crime Type</option>
+                            <option value="Homicide">Homicide</option>
+                            <option value="Burglary">Burglary</option>
+                            <option value="Cyber Crime">Cyber Crime</option>
+                            <option value="Kidnapping">Kidnapping</option>
+                            <option value="Narcotics">Narcotics</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="police_station">Police Station:</label>
+                        <select id="police_station" name="police_station" required>
+                            <option value="">Select Police Station</option>
+                            <option value="Andheri">Andheri Police Station</option>
+                            <option value="Bandra">Bandra Police Station</option>
+                            <option value="Colaba">Colaba Police Station</option>
+                            <option value="Dadar">Dadar Police Station</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="investigating_officer">Investigating Officer:</label>
+                        <select id="investigating_officer" name="investigating_officer" required>
+                            <option value="">Select Officer</option>
+                            <option value="IO_1">Insp. Sharma</option>
+                            <option value="IO_2">ASI Priya</option>
+                            <option value="IO_3">Insp. Verma</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="priority">Case Priority:</label>
+                        <select id="priority" name="priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="caseDescription" required></textarea>
+                    <label for="expected_date">Expected Resolution Date:</label>
+                    <input type="date" id="expected_date" name="expected_date" required>
                 </div>
+
                 <div class="form-group">
-                    <label>Department</label>
-                    <select id="caseDepartment" required>
-                        <option value="Criminal Investigation">Criminal Investigation</option>
-                        <option value="Cyber Crime">Cyber Crime</option>
-                        <option value="Narcotics">Narcotics</option>
-                    </select>
+                    <label for="investigation_notes">Investigation Notes:</label>
+                    <textarea id="investigation_notes" name="investigation_notes" required></textarea>
                 </div>
+
                 <div class="form-group">
-                    <label>Priority</label>
-                    <select id="casePriority" required>
-                        <option value="High">High</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Low">Low</option>
-                    </select>
+                    <label for="attachments">Upload Documents:</label>
+                    <input type="file" id="attachments" name="attachments" multiple>
+                    <small class="file-hint">Supported formats: PDF, DOC, JPG (Max 5MB)</small>
                 </div>
+
                 <div class="modal-actions">
                     <button type="button" class="cancel-btn">Cancel</button>
-                    <button type="submit" class="submit-btn">Create Case</button>
+                    <button type="submit" class="submit-btn">Assign Case</button>
                 </div>
             </form>
         </div>
@@ -44,24 +88,37 @@ function addCaseCard(caseData) {
     caseCard.className = 'case-card';
     caseCard.innerHTML = `
         <div class="case-header">
-            <span class="case-id">#${caseData.caseNumber}</span>
-            <span class="priority-badge ${caseData.priority.toLowerCase()}">${caseData.priority} Priority</span>
+            <span class="case-id">FIR #${caseData.firNumber}</span>
+            <span class="priority-badge ${caseData.status.toLowerCase()}">${caseData.status}</span>
         </div>
         <h3>${caseData.title}</h3>
+        <div class="case-meta">
+            <span class="crime-type"><i class="fas fa-file-alt"></i> ${caseData.crimeType}</span>
+            <span class="police-station"><i class="fas fa-building"></i> ${caseData.policeStation}</span>
+        </div>
         <p class="case-description">${caseData.description}</p>
         <div class="case-details">
             <div class="detail-item">
-                <i class="fas fa-user"></i>
-                <span>${caseData.assignedTo || 'Unassigned'}</span>
+                <i class="fas fa-user-shield"></i>
+                <span>${caseData.investigatingOfficer}</span>
             </div>
             <div class="detail-item">
                 <i class="fas fa-calendar"></i>
-                <span>${new Date().toLocaleDateString()}</span>
+                <span>Filed: ${caseData.filingDate}</span>
             </div>
         </div>
+        <div class="case-progress">
+            <div class="progress-bar">
+                <div class="progress" style="width: ${caseData.progress}%"></div>
+            </div>
+            <span>${caseData.progress}% Complete</span>
+        </div>
         <div class="case-footer">
-            <span class="status-badge open">Open</span>
-            <button class="view-case-btn">View Details</button>
+            <div class="action-buttons">
+                <button class="view-case-btn"><i class="fas fa-folder-open"></i> View File</button>
+                <button class="update-btn"><i class="fas fa-edit"></i> Update</button>
+                <button class="escalate-btn"><i class="fas fa-exclamation-triangle"></i> Escalate</button>
+            </div>
         </div>
     `;
     casesGrid.prepend(caseCard);
@@ -76,18 +133,20 @@ createCaseBtn.addEventListener('click', () => {
 });
 
 // Handle form submission
-document.getElementById('createCaseForm').addEventListener('submit', (e) => {
+document.getElementById('caseAssignmentForm').addEventListener('submit', (e) => {
     e.preventDefault();
     
     const caseData = {
-        title: document.getElementById('caseTitle').value,
-        description: document.getElementById('caseDescription').value,
-        department: document.getElementById('caseDepartment').value,
-        priority: document.getElementById('casePriority').value,
-        status: 'Open',
-        caseNumber: generateCaseNumber(),
-        assignedTo: 'Unassigned',
-        date: new Date().toLocaleDateString()
+        firNumber: document.getElementById('fir_number').value,
+        crimeType: document.getElementById('crime_type').value,
+        policeStation: document.getElementById('police_station').value,
+        investigatingOfficer: document.getElementById('investigating_officer').value,
+        priority: document.getElementById('priority').value,
+        expectedDate: document.getElementById('expected_date').value,
+        description: document.getElementById('investigation_notes').value,
+        status: 'Active',
+        progress: 0,
+        filingDate: new Date().toLocaleDateString()
     };
 
     // Add case card to UI
@@ -95,9 +154,9 @@ document.getElementById('createCaseForm').addEventListener('submit', (e) => {
     
     // Close modal and reset form
     modal.style.display = 'none';
-    document.getElementById('createCaseForm').reset();
+    document.getElementById('caseAssignmentForm').reset();
 
-    showNotification('Case created successfully', 'success');
+    showNotification('Case assigned successfully', 'success');
 });
 
 // Close modal when clicking cancel or outside

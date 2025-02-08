@@ -23,10 +23,10 @@
 
 .auth-card {
     background: #ffffff;
-    padding: 40px;
+    padding: 30px;
     border-radius: 12px;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     border: none;
 }
@@ -35,13 +35,13 @@
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     justify-content: center;
 }
 
 .input-group {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .input-group i {
@@ -94,7 +94,7 @@
 }
 
 .login-type-toggle {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     text-align: center;
 }
 
@@ -197,23 +197,22 @@
 
 .verification-notice {
     background-color: #EDF2F7;
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
 }
 
 .verification-notice i {
     color: #4299E1;
-    font-size: 1.2rem;
 }
 
 .verification-notice p {
-    color: #4A5568;
-    font-size: 0.9rem;
     margin: 0;
+    color: #4A5568;
 }
 
 select {
@@ -226,6 +225,9 @@ select {
     transition: border-color 0.3s;
     appearance: none;
     -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23718096' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
     cursor: pointer;
 }
 
@@ -288,4 +290,58 @@ select:focus {
         margin-bottom: 20px;
         padding-bottom: 15px;
     }
+
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .auth-card {
+        padding: 20px;
+    }
+}
+
+/* Add these new styles */
+.compact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .input-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Update select styling */
+select {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1a202c;
+    transition: border-color 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23718096' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    cursor: pointer;
+}
+
+select:focus {
+    border-color: #2563eb;
+    outline: none;
+}
+
+/* Ensure forms maintain consistent height */
+#cityLevelForm, #stationLevelForm {
+    min-height: 400px;
 } 

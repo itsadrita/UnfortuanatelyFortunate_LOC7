@@ -54,11 +54,23 @@
             <div class="case-management-container">
                 <div class="filters-section">
                     <div class="filter-group">
-                        <label>Department</label>
-                        <select data-filter="department">
-                            <option value="All Departments">All Departments</option>
-                            <option value="Criminal Investigation">Criminal Investigation</option>
+                        <label>Police Station</label>
+                        <select data-filter="station">
+                            <option value="All Stations">All Stations</option>
+                            <option value="Andheri">Andheri Police Station</option>
+                            <option value="Bandra">Bandra Police Station</option>
+                            <option value="Colaba">Colaba Police Station</option>
+                            <option value="Dadar">Dadar Police Station</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Crime Type</label>
+                        <select data-filter="crimeType">
+                            <option value="All Types">All Types</option>
+                            <option value="Homicide">Homicide</option>
+                            <option value="Burglary">Burglary</option>
                             <option value="Cyber Crime">Cyber Crime</option>
+                            <option value="Kidnapping">Kidnapping</option>
                             <option value="Narcotics">Narcotics</option>
                         </select>
                     </div>
@@ -66,18 +78,19 @@
                         <label>Status</label>
                         <select data-filter="status">
                             <option value="All Status">All Status</option>
-                            <option value="Open">Open</option>
-                            <option value="In Progress">In Progress</option>
+                            <option value="Urgent">Urgent</option>
+                            <option value="Active">Active</option>
+                            <option value="Pending">Pending</option>
                             <option value="Closed">Closed</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Priority</label>
-                        <select data-filter="priority">
-                            <option value="All Priorities">All Priorities</option>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
+                        <label>Investigating Officer</label>
+                        <select data-filter="officer">
+                            <option value="All Officers">All Officers</option>
+                            <option value="Insp. Sharma">Insp. Sharma</option>
+                            <option value="ASI Priya">ASI Priya</option>
+                            <option value="Insp. Verma">Insp. Verma</option>
                         </select>
                     </div>
                 </div>

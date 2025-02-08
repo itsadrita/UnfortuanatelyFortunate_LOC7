@@ -217,4 +217,44 @@ class SignupManager {
 // Initialize signup manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new SignupManager();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const loginTypeToggle = document.getElementById('loginTypeToggle');
+    const cityLevelForm = document.getElementById('cityLevelForm');
+    const stationLevelForm = document.getElementById('stationLevelForm');
+    const cityLevelLabel = document.querySelector('.city-level');
+    const stationLevelLabel = document.querySelector('.station-level');
+
+    // Toggle between forms
+    loginTypeToggle.addEventListener('change', function() {
+        if (this.checked) {
+            // Station Level
+            cityLevelForm.style.display = 'none';
+            stationLevelForm.style.display = 'flex';
+            cityLevelLabel.classList.remove('active');
+            stationLevelLabel.classList.add('active');
+        } else {
+            // City Level
+            cityLevelForm.style.display = 'flex';
+            stationLevelForm.style.display = 'none';
+            cityLevelLabel.classList.add('active');
+            stationLevelLabel.classList.remove('active');
+        }
+    });
+
+    // Form submission handlers
+    cityLevelForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Handle city level registration
+        console.log('City Level Registration');
+        // Add your registration logic here
+    });
+
+    stationLevelForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Handle station level registration
+        console.log('Station Level Registration');
+        // Add your registration logic here
+    });
 }); 
