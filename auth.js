@@ -136,8 +136,9 @@ class AuthManager {
             localStorage.setItem('userRole', codeValidation.role);
             console.log('Setting user role:', codeValidation.role); // Debug log
             
-            // Redirect to dashboard
-            window.location.href = 'index.html';
+            // Redirect based on officer level
+            const redirectPath = codeValidation.level === 'city' ? 'dashboard.html' : 'index.html';
+            window.location.href = redirectPath;
         } catch (error) {
             this.showError('Invalid email or password');
             console.error('Login error:', error);

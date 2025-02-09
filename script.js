@@ -89,7 +89,7 @@ function checkPageAccess() {
     const userRole = sessionStorage.getItem('userRole');
     const currentPage = window.location.pathname;
     
-    const ioPages = ['case-file.html', 'reportgen.html', 'communication.html'];
+    const ioPages = ['case-file.html', 'reportgen.html', 'websocket/websocket/secure-messaging-mvp/public/index.html'];
     const shoPages = ['case-management.html', 'grievance.html', 'office-management.html'];
     
     if (userRole) {
@@ -189,7 +189,7 @@ function renderNavigation(userRole) {
                 text: 'Reports'
             },
             {
-                href: 'communication.html',
+                href: 'websocket/websocket/secure-messaging-mvp/public/index.html',
                 icon: 'fa-comments',
                 text: 'Communication'
             }

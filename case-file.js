@@ -1,27 +1,342 @@
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // Add progress tracker styles
-        addProgressTrackerStyles();
+        // Check if viewing specific case or cases list
+        const caseId = new URLSearchParams(window.location.search).get('id');
         
-        // Initialize progress tracker with saved step or default
-        const savedStep = localStorage.getItem('currentStep') || 'io-assigned';
-        updateProgressTracker(savedStep);
-        handleProgressStep(savedStep);
-        
-        // Load case data
-        loadCaseData();
-        
-        // Initialize tabs
-        initializeTabs();
-        
-        // Setup event listeners last
-        setupEventListeners();
-        
-        console.log('Initialization complete');
+        if (caseId) {
+            // Load specific case details
+            loadCaseDetails(caseId);
+        } else {
+            // Show assigned cases list
+            showAssignedCases();
+        }
     } catch (error) {
         console.error('Error during initialization:', error);
+        showNotification('Error loading data', 'error');
+    }
+    initializeDailyLog();
+    initializeUpdates();
+    initializeEvidence();
+});
+
+// Dummy data for demonstration
+const dummyCases = [
+    {
+        id: "CASE001",
+        title: "Robbery at Main Street",
+        date: "2024-03-15",
+        status: "Active",
+        priority: "High",
+        description: "Armed robbery reported at 123 Main Street jewelry store"
+    },
+    {
+        id: "CASE002",
+        title: "Vehicle Theft",
+        date: "2024-03-14",
+        status: "Active",
+        priority: "Medium",
+        description: "White Toyota Camry stolen from downtown parking"
+    }
+];
+
+// Show list of assigned cases
+function showAssignedCases() {
+    const mainContent = document.querySelector('.main-content');
+    mainContent.innerHTML = `
+        <div class="assigned-cases">
+            <h1>Assigned Cases</h1>
+            <div class="cases-grid">
+                ${dummyCases.map(caseItem => `
+                    <div class="case-card" onclick="window.location.href='case-file.html?id=${caseItem.id}'">
+                        <div class="case-card-header">
+                            <h3>${caseItem.title}</h3>
+                            <span class="case-badge ${caseItem.priority.toLowerCase()}">${caseItem.priority}</span>
+                        </div>
+                        <div class="case-card-content">
+                            <p><strong>Case ID:</strong> ${caseItem.id}</p>
+                            <p><strong>Date:</strong> ${caseItem.date}</p>
+                            <p><strong>Status:</strong> ${caseItem.status}</p>
+                            <p>${caseItem.description}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    // Add necessary styles
+    addCaseListStyles();
+}
+
+// Load specific case details
+function loadCaseDetails(caseId) {
+    // Find case from dummy data
+    const caseDetails = dummyCases.find(c => c.id === caseId);
+    
+    if (!caseDetails) {
+        showNotification('Case not found', 'error');
+        return;
+    }
+
+    // Update case header
+    document.querySelector('.case-title h1').textContent = caseDetails.title;
+    document.querySelector('.status-badge').textContent = caseDetails.status;
+    document.querySelector('.priority-badge').textContent = `${caseDetails.priority} Priority`;
+
+    // Initialize event listeners for modals
+    initializeModals();
+}
+
+// Cloudinary Upload Widget Configuration
+let uploadedFiles = [];
+
+const evidenceWidget = cloudinary.createUploadWidget({
+    cloudName: 'dv2gmz2if',
+    uploadPreset: 'SARK',
+    sources: ['local', 'url'],
+    multiple: true,
+    folder: 'evidence', // Base folder
+    resourceType: 'auto', // Automatically detect resource type
+    clientAllowedFormats: ['jpg', 'png', 'gif', 'mp4', 'mov', 'pdf', 'doc', 'docx'],
+    maxFiles: 10,
+    maxFileSize: 20000000, // 20MB
+}, (error, result) => {
+    if (!error && result && result.event === "success") {
+        handleUploadSuccess(result);
     }
 });
+
+function handleUploadSuccess(result) {
+    const previewContainer = document.getElementById('evidencePreview');
+    const evidenceType = document.getElementById('evidenceType').value;
+    
+    // Store uploaded file info
+    uploadedFiles.push({
+        url: result.info.secure_url,
+        type: result.info.resource_type,
+        format: result.info.format,
+        originalName: result.info.original_filename
+    });
+
+    // Create preview element
+    const previewItem = document.createElement('div');
+    previewItem.className = 'preview-item';
+
+    if (result.info.resource_type === 'image') {
+        previewItem.innerHTML = `
+            <img src="${result.info.thumbnail_url || result.info.secure_url}" alt="Evidence">
+            <span class="filename">${result.info.original_filename}</span>
+        `;
+    } else if (result.info.resource_type === 'video') {
+        previewItem.innerHTML = `
+            <video width="150" height="100" controls>
+                <source src="${result.info.secure_url}" type="video/${result.info.format}">
+            </video>
+            <span class="filename">${result.info.original_filename}</span>
+        `;
+    } else {
+        previewItem.innerHTML = `
+            <div class="document-preview">
+                <i class="fas fa-file-alt"></i>
+                <span class="filename">${result.info.original_filename}</span>
+            </div>
+        `;
+    }
+
+    previewContainer.appendChild(previewItem);
+}
+
+// Modified evidence form submission
+function initializeModals() {
+    // Update form submission
+    document.getElementById('updateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        addUpdate({
+            date: formData.get('date'),
+            time: formData.get('time'),
+            details: formData.get('details'),
+            attachments: formData.get('attachments')
+        });
+        closeModal('addUpdateModal');
+    });
+
+    // Evidence form submission
+    document.getElementById('evidenceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        // Add uploaded files to evidence data
+        const evidenceData = {
+            type: formData.get('type'),
+            description: formData.get('description'),
+            location: formData.get('location'),
+            files: uploadedFiles
+        };
+
+        addEvidence(evidenceData);
+        uploadedFiles = []; // Reset uploaded files array
+        closeModal('addEvidenceModal');
+    });
+
+    // Initialize upload widget button
+    document.getElementById('evidenceUploadWidget').addEventListener('click', function() {
+        evidenceWidget.open();
+    });
+
+    // Add grant access button handler
+    document.getElementById('grantAccessButton').addEventListener('click', function() {
+        window.open("https://upload-request.cloudinary.com/dv2gmz2if/5fc22d5e10125118539cc599d4ee06ec", "_blank");
+    });
+}
+
+// Add investigation update
+function addUpdate(updateData) {
+    const updatesList = document.querySelector('.updates-list');
+    const updateElement = document.createElement('div');
+    updateElement.className = 'update-entry';
+    updateElement.innerHTML = `
+        <div class="update-header">
+            <span class="update-time">${updateData.date} ${updateData.time}</span>
+        </div>
+        <div class="update-content">
+            <p>${updateData.details}</p>
+            ${updateData.attachments ? `<div class="attachments">
+                <i class="fas fa-paperclip"></i> ${updateData.attachments.name}
+            </div>` : ''}
+        </div>
+    `;
+    updatesList.insertBefore(updateElement, updatesList.firstChild);
+    showNotification('Update added successfully');
+}
+
+// Modified addEvidence function
+function addEvidence(evidenceData) {
+    const evidences = JSON.parse(localStorage.getItem(`evidences_${getCaseId()}`) || '[]');
+    evidences.push(evidenceData);
+    localStorage.setItem(`evidences_${getCaseId()}`, JSON.stringify(evidences));
+
+    // Update the UI
+    displayEvidence();
+    closeModal('addEvidenceModal');
+    showNotification('Evidence added successfully');
+}
+
+// Display evidence in the main interface
+function displayEvidence() {
+    const evidences = JSON.parse(localStorage.getItem(`evidences_${getCaseId()}`) || '[]');
+    const evidenceContainer = document.querySelector('.evidence-list');
+    
+    evidenceContainer.innerHTML = evidences.map(evidence => `
+        <div class="evidence-item">
+            <div class="evidence-type">
+                <i class="fas fa-${getEvidenceIcon(evidence.type)}"></i>
+            </div>
+            <div class="evidence-details">
+                <h4>${evidence.type}</h4>
+                <p>${evidence.description}</p>
+                <small><i class="fas fa-map-marker-alt"></i> ${evidence.location}</small>
+                <div class="evidence-files">
+                    ${evidence.files.map(file => {
+                        if (file.type === 'image') {
+                            return `<img src="${file.url}" alt="Evidence" class="evidence-preview">`;
+                        } else if (file.type === 'video') {
+                            return `<video controls class="evidence-preview">
+                                        <source src="${file.url}" type="video/${file.format}">
+                                    </video>`;
+                        } else {
+                            return `<a href="${file.url}" target="_blank" class="document-link">
+                                        <i class="fas fa-file-alt"></i> ${file.originalName}
+                                    </a>`;
+                        }
+                    }).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Helper functions
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = 'flex';
+    
+    // Load appropriate form content based on modal type
+    const content = getModalContent(modalId);
+    modal.querySelector('.modal-content').innerHTML = content;
+    
+    // Add close button functionality
+    const closeBtn = modal.querySelector('.close-modal');
+    if (closeBtn) {
+        closeBtn.onclick = () => closeModal(modalId);
+    }
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function getEvidenceIcon(type) {
+    const icons = {
+        'photo': 'camera',
+        'video': 'video',
+        'document': 'file-alt',
+        'physical': 'box'
+    };
+    return icons[type] || 'folder';
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+
+// Add styles for case list view
+function addCaseListStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .assigned-cases {
+            padding: 20px;
+        }
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .case-card {
+            background-color: var(--card-background-dark);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .case-card:hover {
+            transform: translateY(-2px);
+        }
+        .case-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .case-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .case-badge.high { background-color: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .case-badge.medium { background-color: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .case-badge.low { background-color: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+    `;
+    document.head.appendChild(style);
+}
 
 function loadCaseData() {
     // Fetch case data from server/localStorage
@@ -158,7 +473,7 @@ const modalTemplates = {
                 <h2>Add Evidence</h2>
                 <button class="close-modal">&times;</button>
             </div>
-            <form id="addEvidenceForm">
+            <form id="addEvidenceForm" onsubmit="handleEvidenceSubmit(event)">
                 <div class="form-group">
                     <label>Evidence Type</label>
                     <select required name="evidenceType">
@@ -174,19 +489,11 @@ const modalTemplates = {
                     <textarea required name="description"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Collection Date & Time</label>
-                    <input type="datetime-local" required name="collectionDate">
-                </div>
-                <div class="form-group">
-                    <label>Location Found</label>
-                    <input type="text" required name="location">
-                </div>
-                <div class="form-group">
                     <label>Upload Files</label>
                     <input type="file" multiple name="files">
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="cancel-btn">Cancel</button>
+                    <button type="button" class="cancel-btn" onclick="closeModal('addEvidenceModal')">Cancel</button>
                     <button type="submit" class="submit-btn">Add Evidence</button>
                 </div>
             </form>
@@ -199,7 +506,7 @@ const modalTemplates = {
                 <h2>Add Investigation Log Entry</h2>
                 <button class="close-modal">&times;</button>
             </div>
-            <form id="addLogEntryForm">
+            <form id="addLogEntryForm" onsubmit="handleLogSubmit(event)">
                 <div class="form-row">
                     <div class="form-group">
                         <label>Date</label>
@@ -236,146 +543,6 @@ const modalTemplates = {
         </div>
     `
 };
-
-// Show modal function
-function showModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'flex';
-    
-    // Load appropriate form content based on modal type
-    const content = getModalContent(modalId);
-    modal.querySelector('.modal-content').innerHTML = content;
-    
-    // Add close button functionality
-    const closeBtn = modal.querySelector('.close-modal');
-    if (closeBtn) {
-        closeBtn.onclick = () => modal.style.display = 'none';
-    }
-}
-
-// Get modal content based on type
-function getModalContent(modalId) {
-    switch(modalId) {
-        case 'addPartyModal':
-            return `
-                <div class="modal-header">
-                    <h2>Add Involved Party</h2>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <form id="addPartyForm" onsubmit="handlePartySubmit(event)">
-                    <div class="form-group">
-                        <label>Party Type</label>
-                        <select required name="partyType">
-                            <option value="victim">Victim</option>
-                            <option value="suspect">Suspect</option>
-                            <option value="witness">Witness</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" required name="name">
-                        </div>
-                        <div class="form-group">
-                            <label>Age</label>
-                            <input type="number" required name="age">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Statement</label>
-                        <textarea required name="statement"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Photo</label>
-                        <input type="file" accept="image/*" name="photo">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" onclick="closeModal('addPartyModal')">Cancel</button>
-                        <button type="submit" class="submit-btn">Add Party</button>
-                    </div>
-                </form>
-            `;
-        
-        case 'addEvidenceModal':
-            return `
-                <div class="modal-header">
-                    <h2>Add Evidence</h2>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <form id="addEvidenceForm" onsubmit="handleEvidenceSubmit(event)">
-                    <div class="form-group">
-                        <label>Evidence Type</label>
-                        <select required name="evidenceType">
-                            <option value="physical">Physical Evidence</option>
-                            <option value="digital">Digital Evidence</option>
-                            <option value="document">Document</option>
-                            <option value="photo">Photograph</option>
-                            <option value="video">Video</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea required name="description"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Upload Files</label>
-                        <input type="file" multiple name="files">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" onclick="closeModal('addEvidenceModal')">Cancel</button>
-                        <button type="submit" class="submit-btn">Add Evidence</button>
-                    </div>
-                </form>
-            `;
-        
-        case 'addLogModal':
-            return `
-                <div class="modal-header">
-                    <h2>Add Investigation Log Entry</h2>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <form id="addLogEntryForm" onsubmit="handleLogSubmit(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" required name="date">
-                        </div>
-                        <div class="form-group">
-                            <label>Time</label>
-                            <input type="time" required name="time">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Activity Type</label>
-                        <select required name="activityType">
-                            <option value="investigation">Investigation</option>
-                            <option value="interview">Interview/Interrogation</option>
-                            <option value="evidence">Evidence Collection</option>
-                            <option value="surveillance">Surveillance</option>
-                            <option value="report">Report Writing</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea required name="description"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Attachments</label>
-                        <input type="file" multiple name="attachments">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" onclick="closeModal('addLogModal')">Cancel</button>
-                        <button type="submit" class="submit-btn">Add Entry</button>
-                    </div>
-                </form>
-            `;
-    }
-}
-
-// Close modal function
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}
 
 // Handle form submissions with entry display
 function handlePartySubmit(event) {
@@ -470,7 +637,7 @@ function createEvidenceCard(data) {
         <div class="evidence-icon">
             ${getEvidenceIcon(data.type)}
         </div>
-        <div class="evidence-info">
+        <div class="evidence-details">
             <h4>${data.type}</h4>
             <p>${data.description}</p>
             ${data.files ? `<span class="file-count"><i class="fas fa-paperclip"></i> ${data.files.length} files</span>` : ''}
@@ -702,3 +869,152 @@ function getCaseId() {
 }
 
 // Update the HTML structure in case-file.html to match the new progress steps: 
+
+// Initialize daily log functionality
+function initializeDailyLog() {
+    // Set today's date by default
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="logDate"]').value = today;
+
+    // Load existing tasks if any
+    loadScheduledTasks();
+
+    // Ensure modal is initialized only once
+    const dailyLogModal = document.getElementById('dailyLogModal');
+    if (dailyLogModal) {
+        dailyLogModal.querySelector('.cancel-btn').addEventListener('click', () => closeModal('dailyLogModal'));
+    }
+}
+
+// Add task to tomorrow's schedule
+function addScheduledTask() {
+    const input = document.getElementById('newTaskInput');
+    const taskText = input.value.trim();
+    
+    if (taskText) {
+        const taskList = document.getElementById('scheduledTasks');
+        const taskElement = document.createElement('div');
+        taskElement.className = 'scheduled-task';
+        taskElement.innerHTML = `
+            <label class="task-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+                <span class="task-text">${taskText}</span>
+            </label>
+            <button class="delete-task" onclick="deleteTask(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        taskList.appendChild(taskElement);
+        input.value = '';
+        
+        // Save tasks to localStorage
+        saveScheduledTasks();
+    }
+}
+
+// Delete task
+function deleteTask(button) {
+    button.parentElement.remove();
+    saveScheduledTasks();
+}
+
+// Save tasks to localStorage
+function saveScheduledTasks() {
+    const tasks = [];
+    document.querySelectorAll('.scheduled-task').forEach(taskElement => {
+        tasks.push({
+            text: taskElement.querySelector('.task-text').textContent,
+            completed: taskElement.querySelector('input[type="checkbox"]').checked
+        });
+    });
+    localStorage.setItem(`tasks_${getCaseId()}`, JSON.stringify(tasks));
+}
+
+// Load tasks from localStorage
+function loadScheduledTasks() {
+    const tasks = JSON.parse(localStorage.getItem(`tasks_${getCaseId()}`) || '[]');
+    const taskList = document.getElementById('scheduledTasks');
+    taskList.innerHTML = '';
+    
+    tasks.forEach(task => {
+        const taskElement = document.createElement('div');
+        taskElement.className = 'scheduled-task';
+        taskElement.innerHTML = `
+            <label class="task-checkbox">
+                <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                <span class="checkmark"></span>
+                <span class="task-text">${task.text}</span>
+            </label>
+            <button class="delete-task" onclick="deleteTask(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        taskList.appendChild(taskElement);
+    });
+}
+
+// Save daily logs
+function saveDailyLog() {
+    const formData = new FormData(document.getElementById('todayLogForm'));
+    const logData = {
+        date: formData.get('logDate'),
+        activities: formData.get('activities'),
+        findings: formData.get('findings'),
+        scheduledTasks: Array.from(document.querySelectorAll('.scheduled-task')).map(task => ({
+            text: task.querySelector('.task-text').textContent,
+            completed: task.querySelector('input[type="checkbox"]').checked
+        }))
+    };
+
+    // Save to localStorage (you can modify this to save to your backend)
+    const logs = JSON.parse(localStorage.getItem(`logs_${getCaseId()}`) || '[]');
+    logs.push(logData);
+    localStorage.setItem(`logs_${getCaseId()}`, JSON.stringify(logs));
+
+    // Update the UI
+    displayDailyLogs();
+    closeModal('dailyLogModal');
+    showNotification('Daily log saved successfully');
+}
+
+// Display daily logs in the main interface
+function displayDailyLogs() {
+    const logs = JSON.parse(localStorage.getItem(`logs_${getCaseId()}`) || '[]');
+    const logsContainer = document.querySelector('.daily-logs-list') || createLogsContainer();
+    
+    logsContainer.innerHTML = logs.map(log => `
+        <div class="log-entry">
+            <div class="log-date">${new Date(log.date).toLocaleDateString()}</div>
+            <div class="log-content">
+                <h4>Activities</h4>
+                <p>${log.activities}</p>
+                ${log.findings ? `
+                    <h4>Key Findings</h4>
+                    <p>${log.findings}</p>
+                ` : ''}
+                ${log.scheduledTasks.length ? `
+                    <h4>Scheduled Tasks</h4>
+                    <ul class="task-list">
+                        ${log.scheduledTasks.map(task => `
+                            <li class="${task.completed ? 'completed' : ''}">${task.text}</li>
+                        `).join('')}
+                    </ul>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Create logs container if it doesn't exist
+function createLogsContainer() {
+    const container = document.createElement('div');
+    container.className = 'daily-logs-list';
+    document.querySelector('.case-content').appendChild(container);
+    return container;
+}
+
+// Initialize evidence functionality
+function initializeEvidence() {
+    displayEvidence();
+} 
